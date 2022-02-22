@@ -58,6 +58,7 @@ export  function Simple() {
 
 }
 export  function Sequential() {
+    map.initSequential(10)
     for(var i = 0; i < 10; i++){
         map.store(`user_${__VU}`,`user_${__VU}_${uuidv4()}`)
     }

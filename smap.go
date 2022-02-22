@@ -18,10 +18,8 @@ type SMap struct {
 
 func New() *SMap {
 	res := &SMap{
-		ch: make(chan interface{}, 100),
 		mp: new(sync.Map),
 	}
-	go worker(res)
 	return res
 }
 
@@ -43,6 +41,11 @@ func (s *SMap) LoadAndDelete(k interface{}) (interface{}, bool) {
 
 func (s *SMap) LoadOrStore(k interface{}, v interface{}) (interface{}, bool) {
 	return s.mp.LoadOrStore(k, v)
+}
+
+func (s *SMap) InitSequential(len int) {
+	s.ch = make(chan interface{}, len)
+	go worker(s)
 }
 
 func (s *SMap) Sequential() interface{} {
