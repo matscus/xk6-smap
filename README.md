@@ -15,9 +15,12 @@
 ## Example
 
 ```javascript
-import { check } from 'k6'
+iimport { check } from 'k6'
 import smap from 'k6/x/smap'
 import { uuidv4 } from 'https://jslib.k6.io/k6-utils/1.1.0/index.js'
+
+
+
 export const options = { 
   scenarios: {
     Single: {
@@ -35,6 +38,7 @@ export const options = {
   }
 }
 let map = smap
+
 export  function Simple() {
     let uuid = uuidv4()
     map.store(`${__VU}`,uuid)
@@ -71,6 +75,7 @@ export  function Simple() {
 
 }
 export  function Sequential() {
+    map.initSequential(10)
     for(var i = 0; i < 10; i++){
         map.store(`user_${__VU}`,`user_${__VU}_${uuidv4()}`)
     }
