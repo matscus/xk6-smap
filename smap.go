@@ -48,6 +48,15 @@ func (s *SMap) InitSequential(len int) {
 	go worker(s)
 }
 
+func (s *SMap) Len() int {
+	l := 0
+	s.mp.Range(func(key, value interface{}) bool {
+		l++
+		return true
+	})
+	return l
+}
+
 func (s *SMap) Sequential() interface{} {
 	return <-s.ch
 }
