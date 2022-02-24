@@ -8,47 +8,49 @@ import (
 )
 
 func init() {
-	modules.Register("k6/x/smap", New())
+	modules.Register("k6/x/smap", new(SMap))
 }
 
-type SMap struct {
+type SMap struct{}
+
+type Client struct {
 	ch chan interface{}
 	mp *sync.Map
 }
 
-func New() *SMap {
-	res := &SMap{
+func (SMap) New() *Client {
+	res := Client{
 		mp: new(sync.Map),
 	}
-	return res
+	return &res
 }
 
-func (s *SMap) Store(k interface{}, v interface{}) {
+func (s *Client) Store(k interface{}, v interface{}) {
 	s.mp.Store(k, v)
 }
 
-func (s *SMap) Load(k interface{}) (interface{}, bool) {
+func (s *Client) Load(k interface{}) (interface{}, bool) {
 	return s.mp.Load(k)
 }
 
-func (s *SMap) Delete(k interface{}) {
+func (s *Client) Delete(k interface{}) {
 	s.mp.Delete(k)
 }
 
-func (s *SMap) LoadAndDelete(k interface{}) (interface{}, bool) {
+func (s *Client) LoadAndDelete(k interface{}) (interface{}, bool) {
 	return s.mp.LoadAndDelete(k)
 }
 
-func (s *SMap) LoadOrStore(k interface{}, v interface{}) (interface{}, bool) {
+func (s *Client) LoadOrStore(k interface{}, v interface{}) (interface{}, bool) {
 	return s.mp.LoadOrStore(k, v)
 }
 
-func (s *SMap) InitSequential(len int) {
+func (s *Client) InitSequential(len int) {
 	s.ch = make(chan interface{}, len)
 	go worker(s)
 }
 
-func (s *SMap) Len() int {
+func (s *Client) Len() int {
 	l := 0
 	s.mp.Range(func(key, value interface{}) bool {
 		l++
@@ -57,11 +59,11 @@ func (s *SMap) Len() int {
 	return l
 }
 
-func (s *SMap) Sequential() interface{} {
+func (s *Client) Sequential() interface{} {
 	return <-s.ch
 }
 
-func worker(s *SMap) {
+func worker(s *Client) {
 	var l = 0
 	defer func() {
 		if err := recover(); err != nil {
