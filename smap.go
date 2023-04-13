@@ -11,14 +11,38 @@ func init() {
 	modules.Register("k6/x/smap", new(SMap))
 }
 
-type SMap struct{}
+type (
+	RootModule struct{}
+
+	SMap struct {
+		vu modules.VU
+		*SyncMap
+	}
+)
+
+var (
+	_ modules.Instance = &SMap{}
+	_ modules.Module   = &RootModule{}
+)
+
+func New() *RootModule {
+	return &RootModule{}
+}
+
+func (*RootModule) NewModuleInstance(vu modules.VU) modules.Instance {
+	return &SMap{vu: vu, SyncMap: &SyncMap{vu: vu}}
+}
+
+type SyncMap struct {
+	vu modules.VU
+}
 
 type Client struct {
 	ch chan interface{}
 	mp *sync.Map
 }
 
-func (SMap) New() *Client {
+func (SMap) Create() *Client {
 	res := Client{
 		mp: new(sync.Map),
 	}
@@ -61,6 +85,10 @@ func (s *Client) Len() int {
 
 func (s *Client) Sequential() interface{} {
 	return <-s.ch
+}
+
+func (c *SMap) Exports() modules.Exports {
+	return modules.Exports{Default: c.SyncMap}
 }
 
 func worker(s *Client) {
